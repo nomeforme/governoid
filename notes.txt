@@ -1,0 +1,15 @@
+USAGE (in root dir):
+create conda env
+pip install -r requirements.txt
+install foundry
+anvil
+copy private key from anvil to .env file (PRIVATE_KEY=<YOUR_KEY>)
+bash build_contracts.sh
+python main.py
+
+------------------------------
+Other
+
+forge init --no-git contracts
+cd contracts && forge build
+forge install OpenZeppelin/openzeppelin-contracts --no-git

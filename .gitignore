@@ -1,0 +1,60 @@
+# Ignore build artifacts
+out/
+artifacts/
+cache/
+lib/
+
+# Ignore dependencies
+lib/
+
+# Ignore editor specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore OS specific files
+.DS_Store
+Thumbs.db
+
+# Ignore Python virtual environment and related files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+env/
+venv/
+ENV/
+ENV.bak/
+venv.bak/
+.Python
+pyvenv.cfg
+
+# Ignore compiled files
+*.class
+*.o
+*.so
+
+# Ignore logs and temporary files
+logs/
+*.log
+*.tmp
+
+# Ignore other unnecessary files
+*.bak
+*.old
+*.orig
+*.rej
+*.sublime-project
+*.sublime-workspace
+
+# Ignore personal files
+*.env
+*.local
+
+# Ignore node modules (if using Node.js)
+node_modules/
+
+# Ignore Anvil specific files (if using Anvil)
+anvil.log
+anvil.db
