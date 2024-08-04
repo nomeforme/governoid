@@ -10,14 +10,16 @@ import os
 load_dotenv()
 
 class Governoid:
-    def __init__(self, provider_url: str, erc721_abi_path: str, commitment_abi_path: str):
+    def __init__(self, agent_id: int, provider_url: str, erc721_abi_path: str, commitment_abi_path: str):
+        self.agent_id = agent_id
+        
         self.web3 = Web3(Web3.HTTPProvider(provider_url))
         
         # Inject the Geth POA middleware for compatibility with certain networks
         self.web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
         # Read the private key from the file
-        self.private_key: str = os.getenv("AGENT_PRIVATE_KEY")
+        self.private_key: str = os.getenv("AGENT_PRIVATE_KEY_"+str(agent_id))
         
         self.account = self.web3.eth.account.from_key(self.private_key)
         
@@ -71,12 +73,33 @@ class Governoid:
         self.erc721_contract = self.deploy_contract(self.erc721_abi, self.erc721_bytecode, [self.account.address])
         print(f"ERC721 Contract deployed at address: {self.erc721_contract.address}")
 
+    def set_erc721_contract(self, contract_address: str) -> None:
+        self.erc721_contract = self.web3.eth.contract(address=contract_address, abi=self.erc721_abi)
+
+    def set_commitment_contract(self, contract_address: str) -> None:
+        self.commitment_contract = self.web3.eth.contract(address=contract_address, abi=self.commitment_abi)
+
     def mint_nft(self) -> int:
         tx = self.build_transaction(self.erc721_contract.functions.mintTo, self.account.address)
         self.sign_and_send_transaction(tx)
         token_id = self.erc721_contract.functions.currentTokenId().call({'from': self.account.address}) - 1
         print(f"NFT minted with token ID {token_id} to address: {self.account.address}")
         return token_id
+    
+    def approve_transfer(self, buyer_address: str, token_id: int) -> None:
+        tx = self.build_transaction(self.erc721_contract.functions.approveTransfer, buyer_address, token_id)
+        self.sign_and_send_transaction(tx)
+        print(f"Approved transfer of token ID {token_id} to {buyer_address}")
+
+
+    def purchase_nft(self, token_id: int, eth_amount: float) -> None:
+        tx = self.build_transaction(
+            self.erc721_contract.functions.transferForEth,
+            token_id,
+            value=self.web3.to_wei(eth_amount, 'ether')
+        )
+        self.sign_and_send_transaction(tx)
+        print(f"Purchased token ID {token_id} for {eth_amount} ETH")
 
     def deploy_commitment_contract(self, token_id: int) -> None:
         self.commitment_contract = self.deploy_contract(
